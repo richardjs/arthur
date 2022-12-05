@@ -5,7 +5,11 @@ from django.forms import widgets
 from arthur.models import Player, Worker
 
 
-admin.site.register(Player)
+class PlayerAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        models.TextField: {'widget': widgets.TextInput},
+    }
+admin.site.register(Player, PlayerAdmin)
 
 
 class WorkerAdmin(admin.ModelAdmin):
