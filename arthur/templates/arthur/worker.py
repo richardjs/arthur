@@ -43,16 +43,62 @@ def check_prereqs():
 def work_loop():
     logging.info('Starting new loop')
 
-    start = server_request('/worker/start')
+    start_data = server_request('/worker/start')
+    players = start_data['players']
+    for player in players:
+        player["tmpdir"] = TemporaryDirectory()
 
-    for player in start['players']:
-        with TemporaryDirectory() as tmpdir:
-            r = partial(run, cwd=tmpdir)
-            r(['git', 'clone', GET_REPO, '.'])
-            r(['git', 'checkout', player['commit']])
-            # TODO defined build too? or standardized shell script?
-            # perhaps make unless an optional build is given
-            r(['make'], cwd=f'{tmpdir}/src')
+    # Build the engines
+    for player in start_data['players']:
+        logging.info(f'Building player {player["id"]}...')
+
+        r = partial(run, cwd=player["tmpdir"].name, capture_output=True)
+        # TODO it's inefficent to clone the repo twice every time we start a new game
+        # perhaps clone it once to local filesystem, and then clone from there?
+        # or somehow have the server send us the code instead? we might not need the whole history
+        r(['git', 'clone', GET_REPO, '.'])
+        r(['git', 'checkout', player['commit']])
+        # TODO defined build too? or standardized shell script?
+        # perhaps make unless an optional build is given
+        r(['make'], cwd=f'{player["tmpdir"].name}/src')
+
+    # TODO don't hard code start
+    state = '0000000000000000000000000xxxxxxxx1'
+
+    # TODO break out after a certain number of moves, in case of getting stuck?
+    # TODO break out after repititions of state?
+    result = None
+    while not result:
+        player = players.pop(0)
+        players.append(player)
+
+        p = run(
+            player['invocation'].split() + [state],
+            cwd=f'{player["tmpdir"].name}/src',
+            capture_output=True,
+        )
+
+        for line in p.stderr.decode().split('\n'):
+            line = line.strip()
+            if ':' in line:
+                field, value = line.split(':', 1)
+                field = field.strip().lower()
+                value = value.strip()
+
+                if field == 'next':
+                    state = value
+
+                elif field == 'result':
+                    result = value.lower()
+
+        # TODO proper logging
+        print('state', state)
+        print('result', result)
+
+        # TODO send log to server (in a separate thread, to keep game progressing?)
+
+    for player in players:
+        player['tmpdir'].cleanup()
 
 
 def main():
