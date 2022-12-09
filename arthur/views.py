@@ -40,7 +40,8 @@ def worker_start(request):
                 'commit': player.commit,
                 'invocation': player.invocation,
             } for player in players
-        ]
+        ],
+        'state': '0000000000000000000000000xxxxxxxx1',
     })
 
 

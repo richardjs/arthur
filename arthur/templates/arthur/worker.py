@@ -62,8 +62,7 @@ def work_loop():
         # perhaps make unless an optional build is given
         r(['make'], cwd=f'{player["tmpdir"].name}/src')
 
-    # TODO don't hard code start
-    state = '0000000000000000000000000xxxxxxxx1'
+    state = start_data['state']
 
     # TODO break out after a certain number of moves, in case of getting stuck?
     # TODO break out after repititions of state?
