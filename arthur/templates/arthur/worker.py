@@ -9,7 +9,6 @@ from tempfile import TemporaryDirectory
 
 
 SERVER_ROOT = '{{ SERVER_ROOT }}'
-GET_REPO = '{{ GIT_REPO }}'
 MAX_GAME_DEPTH = {{ MAX_GAME_DEPTH }}
 
 hostname = socket.gethostname()
@@ -44,7 +43,7 @@ def check_prereqs():
 def work_loop():
     logging.info('Starting new loop')
 
-    start_data = server_request('/worker/start')
+    start_data = server_request('{% url "worker-start" %}')
     players = start_data['players']
     for player in players:
         player["tmpdir"] = TemporaryDirectory()
@@ -57,7 +56,7 @@ def work_loop():
         # TODO it's inefficent to clone the repo twice every time we start a new game
         # perhaps clone it once to local filesystem, and then clone from there?
         # or somehow have the server send us the code instead? we might not need the whole history
-        r(['git', 'clone', GET_REPO, '.'])
+        r(['git', 'clone', player['repository'], '.'])
         r(['git', 'checkout', player['commit']])
         # TODO defined build too? or standardized shell script?
         # perhaps make unless an optional build is given
@@ -65,8 +64,8 @@ def work_loop():
 
     state = start_data['state']
 
-    # TODO break out after a certain number of moves, in case of getting stuck?
     # TODO break out after repititions of state?
+
     move_count = 0
     result = None
     while not result:
@@ -115,7 +114,6 @@ def main():
 
     logging.info('Arthur worker startup')
     logging.debug(f'Server {SERVER_ROOT}')
-    logging.debug(f'Repo {GET_REPO}')
 
     check_prereqs()
 

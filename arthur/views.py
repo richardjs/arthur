@@ -16,6 +16,7 @@ def worker_start(request):
     return JsonResponse({
         'players': [{
                 'id': player.id,
+                'repository': player.repository,
                 'commit': player.commit,
                 'invocation': player.invocation,
             } for player in players
@@ -29,6 +30,5 @@ def worker_py(request):
 
     return render(request, 'arthur/worker.py', {
         'SERVER_ROOT': settings.ARTHUR_SERVER_ROOT,
-        'GIT_REPO': settings.ARTHUR_GIT_REPO,
         'MAX_GAME_DEPTH': settings.ARTHUR_MAX_GAME_DEPTH,
     }, content_type='text/x-python')
