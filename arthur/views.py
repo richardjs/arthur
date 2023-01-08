@@ -7,27 +7,6 @@ from django.shortcuts import render
 from arthur.models import Player, Worker
 
 
-def worker_endpoint(view_func):
-    @wraps(view_func)
-    def wrapper_view(request, *args, **kwargs):
-        hostname = request.headers['Arthur-Hostname']
-        worker, created = Worker.objects.get_or_create(hostname=hostname)
-
-        if created:
-            print(f'New worker with hostname {hostname}')
-        else:
-            # Update check-in time
-            worker.save()
-
-        print(f'Worker ID #{worker.id}')
-
-
-        return view_func(request, *args, **kwargs)
-
-    return wrapper_view
-
-
-@worker_endpoint
 def worker_start(request):
     players = [
         Player.objects.get(pk=1),
