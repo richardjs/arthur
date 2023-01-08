@@ -30,4 +30,5 @@ def worker_py(request):
     return render(request, 'arthur/worker.py', {
         'SERVER_ROOT': settings.ARTHUR_SERVER_ROOT,
         'GIT_REPO': settings.ARTHUR_GIT_REPO,
+        'MAX_GAME_DEPTH': settings.ARTHUR_MAX_GAME_DEPTH,
     }, content_type='text/x-python')

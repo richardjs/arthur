@@ -127,3 +127,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ARTHUR_SERVER_ROOT = 'http://localhost:8000'
 ARTHUR_GIT_REPO = 'https://github.com/richardjs/erastus.git'
+ARTHUR_MAX_GAME_DEPTH = 1000

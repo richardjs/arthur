@@ -10,6 +10,7 @@ from tempfile import TemporaryDirectory
 
 SERVER_ROOT = '{{ SERVER_ROOT }}'
 GET_REPO = '{{ GIT_REPO }}'
+MAX_GAME_DEPTH = {{ MAX_GAME_DEPTH }}
 
 hostname = socket.gethostname()
 
@@ -66,6 +67,7 @@ def work_loop():
 
     # TODO break out after a certain number of moves, in case of getting stuck?
     # TODO break out after repititions of state?
+    move_count = 0
     result = None
     while not result:
         player = players.pop(0)
@@ -95,6 +97,11 @@ def work_loop():
         print('result', result)
 
         # TODO send log to server (in a separate thread, to keep game progressing?)
+
+        move_count += 1
+        if move_count == MAX_GAME_DEPTH:
+            logging.warning(f'Hit {MAX_GAME_DEPTH} moves; stopping game')
+            break
 
     for player in players:
         player['tmpdir'].cleanup()
