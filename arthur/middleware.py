@@ -1,4 +1,9 @@
+import logging
+
 from .models import Player, Worker
+
+
+logger = logging.getLogger(__name__)
 
 
 class WorkerMiddleware:
@@ -10,15 +15,14 @@ class WorkerMiddleware:
             hostname = request.headers['Arthur-Hostname']
 
             worker, created = Worker.objects.get_or_create(hostname=hostname)
-
-            request.worker = worker
-
             if created:
-                print(f'New worker with hostname {hostname}')
+                logger.info(f'New worker #{worker.id} with hostname {hostname}')
             else:
                 # Update check-in time
                 worker.save()
 
-            print(f'Worker ID #{worker.id}')
+            request.worker = worker
+
+            logger.debug(f'Worker #{worker.id} requests {request.path_info}')
 
         return self.get_response(request)

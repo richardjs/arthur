@@ -1,3 +1,4 @@
+import logging
 from functools import wraps
 
 from django.conf import settings
@@ -5,6 +6,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from .models import *
+
+
+logger = logging.getLogger(__name__)
 
 
 def worker_start(request):
@@ -20,6 +24,8 @@ def worker_start(request):
     )
     for player in players:
         game.add_player(player)
+
+    logger.info(f'Assigning worker #{game.worker.id} game #{game.id}')
 
     return JsonResponse(game.start_data)
 
