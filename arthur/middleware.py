@@ -6,7 +6,7 @@ class WorkerMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if 'Arthur-Hostname' in request.headers:
+        if request.path_info.startswith('/worker/'):
             hostname = request.headers['Arthur-Hostname']
 
             worker, created = Worker.objects.get_or_create(hostname=hostname)
