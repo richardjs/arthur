@@ -2,7 +2,13 @@ from django.contrib import admin
 from django.db import models
 from django.forms import widgets
 
-from arthur.models import Player, Worker
+from .models import *
+
+
+admin.site.register(Game)
+
+
+admin.site.register(GamePlayer)
 
 
 class PlayerAdmin(admin.ModelAdmin):
