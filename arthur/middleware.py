@@ -11,18 +11,18 @@ class WorkerMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.path_info.startswith('/worker/'):
-            hostname = request.headers['Arthur-Hostname']
+        if request.path_info.startswith("/worker/"):
+            hostname = request.headers["Arthur-Hostname"]
 
             worker, created = Worker.objects.get_or_create(hostname=hostname)
             if created:
-                logger.info(f'New worker #{worker.id} with hostname {hostname}')
+                logger.info(f"New worker #{worker.id} with hostname {hostname}")
             else:
                 # Update check-in time
                 worker.save()
 
             request.worker = worker
 
-            logger.debug(f'Worker #{worker.id} requests {request.path_info}')
+            logger.debug(f"Worker #{worker.id} requests {request.path_info}")
 
         return self.get_response(request)
