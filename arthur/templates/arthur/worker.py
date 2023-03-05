@@ -64,13 +64,16 @@ def work_loop():
 
     state = start_data['state']
 
+    logging.info(f'Playing game starting from {state}')
     # TODO break out after repititions of state?
-
     move_count = 0
     result = None
     while not result:
         player = players.pop(0)
         players.append(player)
+
+        logging.debug(f'Player {player["number"] + 1} (#{player["id"]}) moving from {state}')
+        prev_state = state
 
         p = run(
             player['invocation'].split() + [state],
@@ -91,16 +94,14 @@ def work_loop():
                 elif field == 'result':
                     result = value.lower()
 
-        # TODO proper logging
-        print('state', state)
-        print('result', result)
-
         # TODO send log to server (in a separate thread, to keep game progressing?)
 
         move_count += 1
         if move_count == MAX_GAME_DEPTH:
             logging.warning(f'Hit {MAX_GAME_DEPTH} moves; stopping game')
             break
+
+    # TODO do we support result: loss conditions? who wins if there are more than two players?
 
     for player in players:
         player['tmpdir'].cleanup()

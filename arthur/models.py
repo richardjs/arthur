@@ -12,7 +12,7 @@ class Game(models.Model):
 
     class Status(models.TextChoices):
         IN_PROGRESS = 'I'
-        FINISHED = 'F'
+        COMPLETED = 'C'
         ERROR = 'E'
         ABANDONED = 'A'
     status = models.CharField(
