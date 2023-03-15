@@ -1,8 +1,6 @@
 # TODO before deploy:
 # - draw recognition
-# - game depth failout
-# - log reporting (incremental or all at once)
-
+# - custom worker name
 
 import json
 import logging
@@ -10,6 +8,7 @@ import socket
 import sys
 import urllib.parse
 import urllib.request
+from collections import Counter
 from functools import partial
 from subprocess import run
 from tempfile import TemporaryDirectory
@@ -17,6 +16,7 @@ from tempfile import TemporaryDirectory
 
 SERVER_ROOT = '{{ SERVER_ROOT }}'
 MAX_GAME_DEPTH = {{ MAX_GAME_DEPTH }}
+DRAW_REPITITIONS = {{ DRAW_REPITITIONS }}
 
 hostname = socket.gethostname()
 
@@ -75,8 +75,15 @@ def work_loop():
     logging.info(f'Playing game starting from {state}')
     # TODO break out after repititions of state?
     move_count = 0
+    repititions = Counter()
     result = None
     while not result:
+        repititions[state] += 1
+        if repititions[state] == DRAW_REPITITIONS:
+            result = 'draw'
+            logging.debug(f'draw by repitition')
+            break
+
         player = players.pop(0)
         players.append(player)
 
@@ -103,7 +110,7 @@ def work_loop():
                     result = value.lower()
 
         # TODO send asynchronously to keep game progressing?
-        # TODO check result
+        # TODO check request result
         server_request('{% url "worker-log" %}', data={
             # TODO it should probably be named game, not game_id
             'game_id': start_data['game_id'],
@@ -115,11 +122,13 @@ def work_loop():
 
         move_count += 1
         if move_count == MAX_GAME_DEPTH:
+            result = 'depth_out'
             logging.warning(f'Hit {MAX_GAME_DEPTH} moves; stopping game')
             break
 
-    # TODO do we support result: loss conditions? who wins if there are more than two players?
-    # TODO check result
+    # TODO do we support result: loss conditions?
+    # TODO who wins if there are more than two players?
+    # TODO check request result
     server_request('{% url "worker-finish" %}', data={
         'game_id': start_data['game_id'],
         'result': result,

@@ -13,6 +13,7 @@ class Game(models.Model):
     class Status(models.TextChoices):
         IN_PROGRESS = "I"
         COMPLETED = "C"
+        DEPTH_OUT = "D"
         ERROR = "E"
         ABANDONED = "A"
 

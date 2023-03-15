@@ -75,19 +75,24 @@ def worker_finish(request):
 
     if result in ["win", "draw"]:
         game.status = Game.Status.COMPLETED
-        game.save()
-    # TODO Support other results
+    elif result == "depth_out":
+        game.state = Game.Status.DEPTH_OUT
+    elif result == "error":
+        game.state = Game.Status.ERROR
     else:
         return HttpResponseForbidden()
 
-    winner = get_object_or_404(Player, pk=request.POST['winner'])
-    if not game.gameplayer_set.filter(player=winner).count():
-        return HttpResponseForbidden()
+    game.save()
 
-    # TODO We're running this query twice
-    gameplayer = game.gameplayer_set.filter(player=winner)[0]
-    gameplayer.winner = True
-    gameplayer.save()
+    if result == 'win':
+        winner = get_object_or_404(Player, pk=request.POST['winner'])
+        if not game.gameplayer_set.filter(player=winner).count():
+            return HttpResponseForbidden()
+
+        # TODO We're running this query twice
+        gameplayer = game.gameplayer_set.filter(player=winner)[0]
+        gameplayer.winner = True
+        gameplayer.save()
 
     return JsonResponse({'result': 'ok'})
 
@@ -99,6 +104,7 @@ def worker_py(request):
         {
             "SERVER_ROOT": settings.ARTHUR_SERVER_ROOT,
             "MAX_GAME_DEPTH": settings.ARTHUR_MAX_GAME_DEPTH,
+            "DRAW_REPITITIONS": settings.ARTHUR_DRAW_REPITITIONS,
         },
         content_type="text/x-python",
     )
