@@ -46,6 +46,14 @@ class Game(models.Model):
         return f"{self.worker} {self.status} {self.start_timestamp}"
 
 
+class GameLog(models.Model):
+    game = models.ForeignKey("Game", on_delete=models.CASCADE)
+    player = models.ForeignKey("Player", on_delete=models.PROTECT)
+    number = models.IntegerField()
+    state = models.TextField()
+    text = models.TextField()
+
+
 class GamePlayer(models.Model):
     game = models.ForeignKey("Game", on_delete=models.CASCADE)
     player = models.ForeignKey("Player", on_delete=models.PROTECT)

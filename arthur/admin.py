@@ -8,6 +8,9 @@ from .models import *
 admin.site.register(Game)
 
 
+admin.site.register(GameLog)
+
+
 admin.site.register(GamePlayer)
 
 

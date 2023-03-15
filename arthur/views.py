@@ -36,6 +36,32 @@ def worker_start(request):
 
 
 @csrf_exempt
+def worker_log(request):
+    # TODO This code is used in several places
+    game_id = request.POST["game_id"]
+
+    game = get_object_or_404(Game, pk=game_id)
+    if game.worker != request.worker or game.status != Game.Status.IN_PROGRESS:
+        return HttpResponseForbidden()
+
+    player = request.POST['player']
+    if not game.gameplayer_set.filter(player=player).count():
+        return HttpResponseForbidden()
+    # TODO We're running this query twice
+    player = game.gameplayer_set.filter(player=player)[0].player
+
+    log = GameLog(
+        game=game,
+        player=player,
+        number=request.POST['number'],
+        state=request.POST['state'],
+        text=request.POST['text'],
+    )
+    log.save()
+    return JsonResponse({'result': 'ok'})
+
+
+@csrf_exempt
 def worker_finish(request):
     game_id = request.POST["game_id"]
 

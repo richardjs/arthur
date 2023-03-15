@@ -1,3 +1,9 @@
+# TODO before deploy:
+# - draw recognition
+# - game depth failout
+# - log reporting (incremental or all at once)
+
+
 import json
 import logging
 import socket
@@ -96,7 +102,16 @@ def work_loop():
                 elif field == 'result':
                     result = value.lower()
 
-        # TODO send log to server (in a separate thread, to keep game progressing?)
+        # TODO send asynchronously to keep game progressing?
+        # TODO check result
+        server_request('{% url "worker-log" %}', data={
+            # TODO it should probably be named game, not game_id
+            'game_id': start_data['game_id'],
+            'player': player['id'],
+            'number': move_count,
+            'state': prev_state,
+            'text': p.stderr.decode(),
+        })
 
         move_count += 1
         if move_count == MAX_GAME_DEPTH:
@@ -104,6 +119,7 @@ def work_loop():
             break
 
     # TODO do we support result: loss conditions? who wins if there are more than two players?
+    # TODO check result
     server_request('{% url "worker-finish" %}', data={
         'game_id': start_data['game_id'],
         'result': result,
