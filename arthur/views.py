@@ -1,5 +1,6 @@
 import logging
 from functools import wraps
+from random import choice
 
 from django.conf import settings
 from django.http import HttpResponseForbidden, JsonResponse
@@ -13,18 +14,21 @@ logger = logging.getLogger(__name__)
 
 
 def worker_start(request):
-    # TODO actually select players
-    players = [
-        Player.objects.get(pk=1),
-        Player.objects.get(pk=2),
-    ]
+    # TODO use a better method for player scheduling
+    all_players = Player.objects.all()
+    assert all_players.count() > 1
+
+    player1 = choice(all_players)
+    player2 = choice(all_players)
+    while player1 == player2:
+        player2 = choice(all_players)
 
     game = Game.objects.create(
         worker=request.worker,
         initial_state="1",
     )
-    for player in players:
-        game.add_player(player)
+    game.add_player(player1)
+    game.add_player(player2)
 
     logger.info(f"Assigning worker #{game.worker.id} game #{game.id}")
 
