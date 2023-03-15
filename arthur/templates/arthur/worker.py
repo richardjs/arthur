@@ -1,9 +1,6 @@
-# TODO before deploy:
-# - draw recognition
-# - custom worker name
-
 import json
 import logging
+import os
 import socket
 import sys
 import urllib.parse
@@ -19,6 +16,7 @@ MAX_GAME_DEPTH = {{ MAX_GAME_DEPTH }}
 DRAW_REPITITIONS = {{ DRAW_REPITITIONS }}
 
 hostname = socket.gethostname()
+worker_name = os.environ.get('ARTHUR_WORKER', hostname)
 
 
 def server_request(path, data=None):
@@ -27,7 +25,7 @@ def server_request(path, data=None):
     request = urllib.request.Request(
         SERVER_ROOT + path,
         headers={
-            'Arthur-Hostname': hostname,
+            'Arthur-Worker': worker_name,
         },
         data=urllib.parse.urlencode(data).encode() if data else None,
     )

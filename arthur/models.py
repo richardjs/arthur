@@ -77,9 +77,9 @@ class Player(models.Model):
 
 
 class Worker(models.Model):
-    hostname = models.TextField()
+    name = models.TextField()
     first_checkin = models.DateTimeField(auto_now_add=True)
     last_checkin = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.hostname
+        return self.name
