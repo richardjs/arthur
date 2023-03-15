@@ -2,6 +2,7 @@ import json
 import logging
 import socket
 import sys
+import urllib.parse
 import urllib.request
 from functools import partial
 from subprocess import run
@@ -14,7 +15,7 @@ MAX_GAME_DEPTH = {{ MAX_GAME_DEPTH }}
 hostname = socket.gethostname()
 
 
-def server_request(path):
+def server_request(path, data=None):
     logging.debug(f'Requesting {path}')
 
     request = urllib.request.Request(
@@ -22,6 +23,7 @@ def server_request(path):
         headers={
             'Arthur-Hostname': hostname,
         },
+        data=urllib.parse.urlencode(data).encode() if data else None,
     )
 
     res = urllib.request.urlopen(request)
@@ -102,6 +104,11 @@ def work_loop():
             break
 
     # TODO do we support result: loss conditions? who wins if there are more than two players?
+    server_request('{% url "worker-finish" %}', data={
+        'game_id': start_data['game_id'],
+        'result': result,
+        'winner': player['id'],
+    })
 
     for player in players:
         player['tmpdir'].cleanup()

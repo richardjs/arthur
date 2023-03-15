@@ -40,7 +40,7 @@ def worker_finish(request):
     game_id = request.POST["game_id"]
 
     game = get_object_or_404(Game, pk=game_id)
-    if game.worker != request.worker or game.status != Game.STATUS.IN_PROGRESS:
+    if game.worker != request.worker or game.status != Game.Status.IN_PROGRESS:
         return HttpResponseForbidden()
 
     # result is "win", "draw", or "error"
@@ -50,8 +50,20 @@ def worker_finish(request):
     if result in ["win", "draw"]:
         game.status = Game.Status.COMPLETED
         game.save()
+    # TODO Support other results
+    else:
+        return HttpResponseForbidden()
 
-    winners = request.POST.getlist("winners")
+    winner = get_object_or_404(Player, pk=request.POST['winner'])
+    if not game.gameplayer_set.filter(player=winner).count():
+        return HttpResponseForbidden()
+
+    # TODO We're running this query twice
+    gameplayer = game.gameplayer_set.filter(player=winner)[0]
+    gameplayer.winner = True
+    gameplayer.save()
+
+    return JsonResponse({'result': 'ok'})
 
 
 def worker_py(request):
