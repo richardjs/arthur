@@ -23,9 +23,12 @@ class PlayerAdmin(admin.ModelAdmin):
 admin.site.register(Player, PlayerAdmin)
 
 
+admin.site.register(Request)
+
+
 class WorkerAdmin(admin.ModelAdmin):
     readonly_fields = ["first_checkin", "last_checkin"]
-    fields = ["hostname", "first_checkin", "last_checkin"]
+    fields = ["name", "first_checkin", "last_checkin"]
     formfield_overrides = {
         models.TextField: {"widget": widgets.TextInput},
     }

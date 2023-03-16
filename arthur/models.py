@@ -76,6 +76,12 @@ class Player(models.Model):
         return self.name or f"Player #{self.id}"
 
 
+class Request(models.Model):
+    player = models.ForeignKey("Player", on_delete=models.CASCADE, related_name='request_set')
+    opponent = models.ForeignKey("Player", on_delete=models.CASCADE, blank=True, null=True, related_name='request_opponent_set')
+    number = models.IntegerField(default=1)
+
+
 class Worker(models.Model):
     name = models.TextField()
     first_checkin = models.DateTimeField(auto_now_add=True)

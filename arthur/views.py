@@ -18,10 +18,28 @@ def worker_start(request):
     all_players = Player.objects.all()
     assert all_players.count() > 1
 
-    player1 = choice(all_players)
-    player2 = choice(all_players)
-    while player1 == player2:
+    if Request.objects.count():
+        r = Request.objects.first()
+
+        player1 = r.player
+        if r.opponent:
+            player2 = r.opponent
+        else:
+            player2 = choice(all_players)
+            while player1 == player2:
+                player2 = choice(all_players)
+
+        r.number -= 1
+        if r.number:
+            r.save()
+        else:
+            r.delete()
+
+    else:
+        player1 = choice(all_players)
         player2 = choice(all_players)
+        while player1 == player2:
+            player2 = choice(all_players)
 
     game = Game.objects.create(
         worker=request.worker,
