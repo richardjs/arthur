@@ -35,6 +35,11 @@ def worker_start(request):
         else:
             r.delete()
 
+        if choice([True, False]):
+            t = player2
+            player2 = player1
+            player1 = t
+
     else:
         player1 = choice(all_players)
         player2 = choice(all_players)
