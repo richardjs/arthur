@@ -148,7 +148,8 @@ def main():
 
     check_prereqs()
 
-    work_loop()
+    while 1:
+        work_loop()
 
 
 if __name__ == '__main__':
