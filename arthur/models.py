@@ -1,3 +1,5 @@
+from collections import Counter
+
 from django.db import models
 
 
@@ -43,6 +45,16 @@ class Game(models.Model):
     def add_player(self, player):
         GamePlayer.objects.create(game=self, player=player, number=self.players.count())
 
+    def max_state_repititions(self):
+        states = [log.state for log in self.gamelog_set.all()]
+        counts = Counter()
+        for state in states:
+            counts[state] += 1
+        return max(counts.values())
+
+    def matchups(self):
+        pass
+
     def __str__(self):
         return f"{self.worker} {self.status} {self.start_timestamp}"
 
@@ -62,6 +74,9 @@ class GamePlayer(models.Model):
     number = models.IntegerField()
     winner = models.BooleanField(default=False)
 
+    def opponent(self):
+        return [gp for gp in gameplayer_set.all() if gp != self][0]
+
     def __str__(self):
         return f"{self.game} player {self.number + 1}"
 
@@ -77,8 +92,16 @@ class Player(models.Model):
 
 
 class Request(models.Model):
-    player = models.ForeignKey("Player", on_delete=models.CASCADE, related_name='request_set')
-    opponent = models.ForeignKey("Player", on_delete=models.CASCADE, blank=True, null=True, related_name='request_opponent_set')
+    player = models.ForeignKey(
+        "Player", on_delete=models.CASCADE, related_name="request_set"
+    )
+    opponent = models.ForeignKey(
+        "Player",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="request_opponent_set",
+    )
     number = models.IntegerField(default=1)
 
 

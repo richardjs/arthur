@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
+from .ratings import calculate_ratings
 
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,7 @@ def worker_log(request):
     if game.worker != request.worker or game.status != Game.Status.IN_PROGRESS:
         return HttpResponseForbidden()
 
-    player = request.POST['player']
+    player = request.POST["player"]
     if not game.gameplayer_set.filter(player=player).count():
         return HttpResponseForbidden()
     # TODO We're running this query twice
@@ -76,12 +77,12 @@ def worker_log(request):
     log = GameLog(
         game=game,
         player=player,
-        number=request.POST['number'],
-        state=request.POST['state'],
-        text=request.POST['text'],
+        number=request.POST["number"],
+        state=request.POST["state"],
+        text=request.POST["text"],
     )
     log.save()
-    return JsonResponse({'result': 'ok'})
+    return JsonResponse({"result": "ok"})
 
 
 @csrf_exempt
@@ -107,8 +108,8 @@ def worker_finish(request):
 
     game.save()
 
-    if result == 'win':
-        winner = get_object_or_404(Player, pk=request.POST['winner'])
+    if result == "win":
+        winner = get_object_or_404(Player, pk=request.POST["winner"])
         if not game.gameplayer_set.filter(player=winner).count():
             return HttpResponseForbidden()
 
@@ -117,7 +118,7 @@ def worker_finish(request):
         gameplayer.winner = True
         gameplayer.save()
 
-    return JsonResponse({'result': 'ok'})
+    return JsonResponse({"result": "ok"})
 
 
 def worker_py(request):
@@ -131,3 +132,63 @@ def worker_py(request):
         },
         content_type="text/x-python",
     )
+
+
+def dashboard(request):
+    ratings = calculate_ratings()
+    player_ratings = {player: r for player, r, rd in ratings}
+    data = []
+    for player, r, rd in ratings:
+        gps = GamePlayer.objects.filter(player=player)
+
+        games = [
+            gp.game
+            for gp in gps
+            if gp.game.status == Game.Status.COMPLETED
+            and gp.game.gameplayer_set.filter(winner=True).count()
+        ]
+
+        wins = [
+            game
+            for game in games
+            if game.gameplayer_set.filter(player=player, winner=True).count()
+        ]
+
+        losses = [
+            game
+            for game in games
+            if game.gameplayer_set.filter(player=player, winner=False).count()
+        ]
+
+        win_opponent_ratings = []
+        for game in wins:
+            opponent = [gp for gp in game.gameplayer_set.all() if gp.player != player][
+                0
+            ].player
+            win_opponent_ratings.append(player_ratings[opponent])
+
+        loss_opponent_ratings = []
+        for game in losses:
+            opponent = [gp for gp in game.gameplayer_set.all() if gp.player != player][
+                0
+            ].player
+            loss_opponent_ratings.append(player_ratings[opponent])
+
+        data.append(
+            {
+                "player_id": player.id,
+                "name": player.name,
+                "r": int(r),
+                "rd": int(rd),
+                "num_games": len(games),
+                "num_wins": len(wins),
+                "num_losses": len(losses),
+                "best_win": int(max(win_opponent_ratings))
+                if win_opponent_ratings
+                else " ",
+                "worst_loss": int(min(loss_opponent_ratings))
+                if loss_opponent_ratings
+                else " ",
+            }
+        )
+    return render(request, "arthur/dashboard.html", locals())

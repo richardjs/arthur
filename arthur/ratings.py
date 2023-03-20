@@ -3,6 +3,8 @@ from .models import *
 
 
 def calculate_ratings():
+    skipped = 0
+
     games = Game.objects.filter(status='C')
 
     ratings = {}
@@ -14,6 +16,7 @@ def calculate_ratings():
         # TODO implement draws
         if len(winner) != 1 or len(loser) != 1:
             print('Skipping game', game.id)
+            skipped += 1
             continue
 
         winner = winner[0].player
@@ -36,4 +39,5 @@ def calculate_ratings():
     ratings = ratings.items()
     ratings = sorted(ratings, key=lambda item: item[1].r, reverse=True)
     ratings = [(player, rating.r, rating.rd) for (player, rating) in ratings]
+    print('Skipped', skipped)
     return ratings

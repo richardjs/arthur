@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            td {
+                border: 1px solid #eee;
+                padding: 5px;
+                text-align: right;
+            }
+        </style>
+    </head>
+    <body>
+        <table>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Games</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Rating</th>
+        <th>RD</th>
+        <th>Best Win</th>
+        <th>Worst Loss</th>
+        {% for row in data %}
+            <tr>
+                <td>{{ row.player_id }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{ row.num_games }}</td>
+                <td>{{ row.num_wins }}</td>
+                <td>{{ row.num_losses }}</td>
+                <td><b>{{ row.r }}</b></td>
+                <td>{{ row.rd }}</td>
+                <td>{{ row.best_win }}</td>
+                <td>{{ row.worst_loss }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    </body>
+</html>
