@@ -160,12 +160,35 @@ def dashboard(request):
             if game.gameplayer_set.filter(player=player, winner=False).count()
         ]
 
+        win_pct = len(wins)/len(games) * 100
+
+        game_moves = [
+            game.gamelog_set.count()
+            for game in games
+        ]
+        game_moves_avg = sum(game_moves)/len(game_moves)
+
+        opponent_ratings = []
+        for game in games:
+            opponent = [gp for gp in game.gameplayer_set.all() if gp.player != player][
+                0
+            ].player
+            opponent_ratings.append(player_ratings[opponent])
+        if opponent_ratings:
+            avg_opponent_rating = sum(opponent_ratings)/len(opponent_ratings)
+        else:
+            avg_opponent_rating = ' '
+
         win_opponent_ratings = []
         for game in wins:
             opponent = [gp for gp in game.gameplayer_set.all() if gp.player != player][
                 0
             ].player
             win_opponent_ratings.append(player_ratings[opponent])
+        if win_opponent_ratings:
+            avg_win_rating = sum(win_opponent_ratings)/len(win_opponent_ratings)
+        else:
+            avg_win_rating = ' '
 
         loss_opponent_ratings = []
         for game in losses:
@@ -173,6 +196,10 @@ def dashboard(request):
                 0
             ].player
             loss_opponent_ratings.append(player_ratings[opponent])
+        if loss_opponent_ratings:
+            avg_loss_rating = sum(loss_opponent_ratings)/len(loss_opponent_ratings)
+        else:
+            avg_loss_rating = ' '
 
         data.append(
             {
@@ -189,6 +216,11 @@ def dashboard(request):
                 "worst_loss": int(min(loss_opponent_ratings))
                 if loss_opponent_ratings
                 else " ",
+                'avg_opponent_rating': avg_opponent_rating,
+                'avg_win_rating': avg_win_rating,
+                'avg_loss_rating': avg_loss_rating,
+                'win_pct': win_pct,
+                'game_moves_avg': game_moves_avg,
             }
         )
     return render(request, "arthur/dashboard.html", locals())

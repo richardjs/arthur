@@ -15,7 +15,7 @@ def calculate_ratings():
 
         # TODO implement draws
         if len(winner) != 1 or len(loser) != 1:
-            print('Skipping game', game.id)
+            #print('Skipping game', game.id)
             skipped += 1
             continue
 

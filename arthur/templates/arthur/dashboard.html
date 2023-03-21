@@ -16,10 +16,15 @@
         <th>Games</th>
         <th>Wins</th>
         <th>Losses</th>
+        <th>Win %</th>
         <th>Rating</th>
         <th>RD</th>
         <th>Best Win</th>
         <th>Worst Loss</th>
+        <th>Avg Win</th>
+        <th>Avg Oppo</th>
+        <th>Avg Loss</th>
+        <th>Avg Length</th>
         {% for row in data %}
             <tr>
                 <td>{{ row.player_id }}</td>
@@ -27,10 +32,15 @@
                 <td>{{ row.num_games }}</td>
                 <td>{{ row.num_wins }}</td>
                 <td>{{ row.num_losses }}</td>
+                <td>{{ row.win_pct|floatformat }}</td>
                 <td><b>{{ row.r }}</b></td>
                 <td>{{ row.rd }}</td>
                 <td>{{ row.best_win }}</td>
                 <td>{{ row.worst_loss }}</td>
+                <td>{{ row.avg_win_rating|floatformat }}</td>
+                <td>{{ row.avg_opponent_rating|floatformat }}</td>
+                <td>{{ row.avg_loss_rating|floatformat }}</td>
+                <td>{{ row.game_moves_avg|floatformat }}</td>
             </tr>
         {% endfor %}
         </table>
