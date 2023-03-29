@@ -3,6 +3,53 @@ from collections import Counter
 from django.db import models
 
 
+class GameManager(models.Manager):
+    def start_data(self):
+        start_actions = Counter()
+        start_actions_wins = Counter()
+        start_logs = [g.gamelog_set.filter(number=0).first() for g in self.all()]
+        for log in start_logs:
+            if not log:
+                continue
+            for line in log.text.split("\n"):
+                if not line.startswith("action:"):
+                    continue
+                _, action = line.split(":")
+                action = action.strip()
+                start_actions[action] += 1
+
+            win_gp = log.game.gameplayer_set.filter(winner=True).first()
+            if win_gp and win_gp.player == log.player:
+                start_actions_wins[action] += 1
+
+        print(start_actions)
+        print(start_actions_wins)
+        for key in start_actions:
+            print(key, start_actions_wins[key] / start_actions[key])
+
+        second_actions = Counter()
+        second_actions_wins = Counter()
+        second_logs = [g.gamelog_set.filter(number=1).first() for g in self.all()]
+        for log in second_logs:
+            if not log:
+                continue
+            for line in log.text.split("\n"):
+                if not line.startswith("action:"):
+                    continue
+                _, action = line.split(":")
+                action = action.strip()[:2]
+                second_actions[action] += 1
+
+            win_gp = log.game.gameplayer_set.filter(winner=True).first()
+            if win_gp and win_gp.player == log.player:
+                second_actions_wins[action] += 1
+
+        print(second_actions)
+        print(second_actions_wins)
+        for key in second_actions:
+            print(key, second_actions_wins[key] / second_actions[key])
+
+
 class Game(models.Model):
     players = models.ManyToManyField("Player", through="GamePlayer")
     worker = models.ForeignKey("Worker", on_delete=models.PROTECT)
@@ -11,6 +58,8 @@ class Game(models.Model):
 
     start_timestamp = models.DateTimeField(auto_now_add=True)
     end_timestamp = models.DateTimeField(null=True)
+
+    objects = GameManager()
 
     class Status(models.TextChoices):
         IN_PROGRESS = "I"
