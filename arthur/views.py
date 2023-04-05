@@ -205,6 +205,8 @@ def dashboard(request):
             {
                 "player_id": player.id,
                 "name": player.name,
+                "commit": player.commit,
+                "invocation": player.invocation,
                 "r": int(r),
                 "rd": int(rd),
                 "num_games": len(games),
