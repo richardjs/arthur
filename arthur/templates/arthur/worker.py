@@ -124,13 +124,19 @@ def work_loop():
             logging.warning(f'Hit {MAX_GAME_DEPTH} moves; stopping game')
             break
 
-    # TODO do we support result: loss conditions?
     # TODO who wins if there are more than two players?
     # TODO check request result
+
+    winner = player['id']
+
+    if result == 'loss':
+        winner = players.pop(0)['id']
+        result = 'win'
+
     server_request('{% url "worker-finish" %}', data={
         'game_id': start_data['game_id'],
         'result': result,
-        'winner': player['id'],
+        'winner': winner,
     })
 
     for player in players:
